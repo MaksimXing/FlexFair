@@ -1,6 +1,5 @@
 from FedBasicFunc.FedBasic import *
 from util.Finetune import Finetune
-from PickHighestDICE import ReturnHighestDiceIndex
 from util.OOD.runOODmethod import runOODmethod
 from util.Fairness.TestResultGeneration.ModelTestPrivate import RunTestMixedPrivate
 from util.Fairness.TestResultGeneration.ModelTestPublic import RunTestMixedPublic
@@ -46,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_color_exchange', type=int, default=1, help='Use CE module in SANet')
 
     parser.add_argument('--alg', type=str, default='fedavg',
-                        help='fl algorithms: nofed/single/cluster/fedavg/fedprox/scaffold/fednova/moon')
+                        help='fl algorithms: fedavg/fedprox/scaffold/fednova')
     parser.add_argument('--target_GPU', type=str, default='0', help='Choose which GPU to use')
 
     parser.add_argument('--dev_mode', type=bool, default=False, help='Choose develop mode')

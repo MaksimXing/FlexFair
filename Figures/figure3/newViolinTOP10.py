@@ -60,7 +60,7 @@ for dataset in datasets:
         weighted_labels = ["FedNova", "FedProx", "SCAFFOLD", "FlexFair", "FairMixup", "FairFed"]
         for idx_, path_ in enumerate(weighted_paths):
             ood_per_seed = []
-            paths_ = natsorted(glob.glob(os.path.join(path_, '*')))  # 对路径进行排序
+            paths_ = natsorted(glob.glob(os.path.join(path_, '*')))  # sort path
             for base_df_path in paths_:
                 global_file = os.path.join(base_df_path, csv_name)
                 print(base_df_path)
@@ -102,7 +102,7 @@ fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 7), sharey=False)
 
 colors = sns.color_palette("Spectral", n_colors=len(labels))
 count_ = 0
-# 遍历每个数据集和对应的子图
+
 for ax, dataset in zip(axes, datasets):
     data = [methods_scores[dataset][label] for label in labels]
     positions = 0.5 * np.arange(len(labels))
@@ -153,7 +153,7 @@ legend_elements = [Patch(facecolor=colors[i], edgecolor='none', hatch='xxx', lab
                    range(len(labels))]
 legend_elements.append(Line2D([0], [0], color='red', marker='x', linestyle='None', label='Mean', markersize=8))
 axes[-1].legend(handles=legend_elements, loc='lower left')
-axes[0].set_ylabel('Dice Score')  # 替换为实际的 Y 轴标签名称
+axes[0].set_ylabel('Dice Score')
 
 for ax in axes:
     for label in ax.get_xticklabels():

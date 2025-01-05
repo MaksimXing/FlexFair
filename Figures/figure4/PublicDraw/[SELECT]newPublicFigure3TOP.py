@@ -118,7 +118,7 @@ for idx_, path_ in enumerate(paths_):
                     # Calculate MaxGap
                     gap_column_2 = np.abs(df.iloc[:, 0].values - df.iloc[:, 1].values)  # Client 1
                     gap_column_3 = np.abs(df.iloc[:, 0].values - df.iloc[:, 2].values)  # Client 2
-                    max_gap_each_row = np.maximum(gap_column_2, gap_column_3)  # 取两个列中的最大gap值
+                    max_gap_each_row = np.maximum(gap_column_2, gap_column_3)  # get max gap
 
                     # Get MaxGap and Dice
                     dice_values = df.iloc[:, 0].values

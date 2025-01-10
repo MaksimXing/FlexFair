@@ -50,7 +50,6 @@ class FedTestMixed(object):
                 final_pred = np.round(pred)
                 iou_ = iou(final_pred, gt)
                 dice_ = dice(final_pred, gt)
-                # cv2.imwrite('C:/Users/xingh/Desktop/' + name[0], final_pred)
                 if self.writer is not None:
                     self.writer.writerow([str(name[0][:-4]), str(iou_), str(dice_)])
                 dict_out[str(name[0][:-4])] = dice_

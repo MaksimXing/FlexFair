@@ -15,7 +15,7 @@ def FairMixupAgeTrain(args, kwargs):
 
     now = datetime.now()
     local_time = now.strftime("%m%d-%H%M%S")
-    path = f'output/age-mixup/s{args.seed}_w{args.penalty_weight}/' + local_time
+    path = f'output-{args.compute_type}/age-mixup/s{args.seed}_w{args.penalty_weight}/' + local_time
     
     mkdiry(path)
 
@@ -45,24 +45,38 @@ def FairMixupAgeTrain(args, kwargs):
 
     ###### Model ######
     model_list = []
-    for index in range(2):
-        model = resnet.resnet50(pretrained=True)
-        model.fc = nn.Linear(in_features=2048, out_features=1)
-        model.cuda()
-        model_list.append(model)
+    if args.compute_type == 'ap':
+        for index in range(2):
+            model = resnet.resnet50(pretrained=True)
+            model.fc = nn.Linear(in_features=2048, out_features=1)
+            model.cuda()
+            model_list.append(model)
 
-    global_model = resnet.resnet50(pretrained=True)
-    global_model.fc = nn.Linear(in_features=2048, out_features=1)
-    global_model.cuda()
+        global_model = resnet.resnet50(pretrained=True)
+        global_model.fc = nn.Linear(in_features=2048, out_features=1)
+        global_model.cuda()
+
+    elif args.compute_type == 'acc':
+        for index in range(2):
+            model = resnet.resnet50(pretrained=True)
+            model.fc = nn.Linear(in_features=2048, out_features=2)
+            model.cuda()
+            model_list.append(model)
+
+        global_model = resnet.resnet50(pretrained=True)
+        global_model.fc = nn.Linear(in_features=2048, out_features=2)
+        global_model.cuda()
 
     cudnn.benchmark = True
     
-    model_state_dict = torch.load(f'../models/seed{args.seed}_model.pth')
+    model_state_dict = torch.load(f'../models/avg{args.seed}_{args.compute_type}_model.pth')
     global_model.load_state_dict(model_state_dict, strict = True)
 
     ###### Criteria ######
-    # id_criterion = nn.CrossEntropyLoss()
-    id_criterion = nn.BCELoss()
+    if args.compute_type == 'ap':
+        id_criterion = nn.BCELoss()
+    elif args.compute_type == 'acc':
+        id_criterion = nn.CrossEntropyLoss()
     
     optimizer_list = []
     lr_scheduler_list = []
@@ -103,7 +117,7 @@ def FairMixupAgeTrain(args, kwargs):
             # update global
             global_model.load_state_dict(global_para)
             # evaluate on validation set
-            df = FedTest(validation_generator_list, validation_set_list, global_model, epoch, writer)
+            df = FedTest(args, validation_generator_list, validation_set_list, global_model, epoch, writer)
             mkdiry(path + '/model/')
             df.to_csv(path + '/model/[EPOCH' + str(epoch) + '.csv', index=False)
             # torch.save(global_model.state_dict(),
@@ -193,10 +207,16 @@ def FairMixupAgeTrain(args, kwargs):
                 else:
                     loss_reg.append(torch.tensor(0.0))
 
-                pred_1 = model(img_1)
-                mk_1 = ys[loader_model_index]
-                mk_1 = mk_1.unsqueeze(1).cuda().float()
-                loss_site.append(id_criterion(pred_1, mk_1))
+                if args.compute_type == 'ap':
+                    pred_1 = model(img_1)
+                    mk_1 = ys[loader_model_index]
+                    mk_1 = mk_1.unsqueeze(1).cuda().float()
+                    loss_site.append(id_criterion(pred_1, mk_1))
+                elif args.compute_type == 'acc':
+                    pred_1 = model(img_1)
+                    mk_1 = ys[loader_model_index]
+                    # print(pred_1.shape, mk_1.shape)
+                    loss_site.append(id_criterion(pred_1, mk_1))
 
             loss = (loss_site[0]) + (loss_site[1]) + (loss_reg[0] + loss_reg[1]) * float(args.penalty_weight)
 

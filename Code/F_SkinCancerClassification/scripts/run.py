@@ -49,12 +49,13 @@ parser.add_argument('--c_lr', default=0.9)
 parser.add_argument('--fairness_step', default=70)
 parser.add_argument('--penalty_weight', default=2.0)
 parser.add_argument('--k', default=30)
-parser.add_argument('--dp_eo', default='dp', help='dp / eo / ablation')
+parser.add_argument('--dp_eo', default='dp', help='dp / eo / noweight')
 parser.add_argument('--sex_age', default='age')
-parser.add_argument('--method', default='fairfed')
+parser.add_argument('--method', default='flexfair')
 parser.add_argument('--datapath', default=datapath)
 
-parser.add_argument('--target_GPU', type=str, default='0', help='Choose which GPU to use')
+parser.add_argument('--target_GPU', type=str, default='1', help='Choose which GPU to use')
+parser.add_argument('--compute_type', type=str, default='acc', help='acc / ap')
 
 # fairfed: beta
 parser.add_argument('--beta', type=float, default=0.01)

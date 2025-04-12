@@ -33,7 +33,8 @@ However, we used data sieved free of age and gender information for fairness tra
 
 ### Private Cervical Cancer Dataset
 
- Due to patient privacy concerns, the private datasets cannot be publicly released but are available upon request and approval. The files can be accessed by going to [Google Drive](https://drive.google.com/drive/folders/1RXtECSl5GoULQD_WE0cecGo1KrtBwx6x?usp=sharing) to obtain the dataset we used by downloading the file with the names `train.zip` and `test.zip`.
+In line with Nature’s open-data principles and to ensure permanent linkage, we have deposited the dataset on Figshare (DOI: 10.6084/m9.figshare.28636133), files can be accessed by going to [Figshare](https://doi.org/10.6084/m9.figshare.28639598). 
+The files can be accessed by going to [Google Drive](https://drive.google.com/drive/folders/1RXtECSl5GoULQD_WE0cecGo1KrtBwx6x?usp=sharing) to obtain the dataset we used by downloading the file with the names `train.zip` and `test.zip`.
 
 ## Prerequisites
 

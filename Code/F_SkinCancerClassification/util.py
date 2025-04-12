@@ -111,7 +111,7 @@ def calculate_dp(result_list, A_list):
 
     return max_gap
 
-def FedTest(train_loader, validation_set, model, epoch, writer):
+def FedTest(args, train_loader, validation_set, model, epoch, writer):
     dataset_size = []
     dataset_total_size = 0
     for index in range(2):
@@ -120,7 +120,7 @@ def FedTest(train_loader, validation_set, model, epoch, writer):
 
     # 0 and 1 are same('\Test'), so we only use 0
     accuracy, ap, Site_dp_results, Site_eo_results, Sex_dp_results, Sex_eo_results, Age_dp_results, Age_eo_results, csv_info = \
-        test(train_loader[0], validation_set[0], model, epoch)
+        test(args, train_loader[0], validation_set[0], model, epoch)
     
     writer.writerow({'epoch': epoch, 'acc':accuracy, 'ap': ap,
                      'Site_DP': Site_dp_results,
@@ -145,7 +145,7 @@ def FedTest(train_loader, validation_set, model, epoch, writer):
     
     return df
 
-def test(train_loader, validation_set, model, epoch):
+def test(args, train_loader, validation_set, model, epoch):
     model.eval()
     result_array = []
     pred_array = []
@@ -163,15 +163,22 @@ def test(train_loader, validation_set, model, epoch):
         data_sample, y, sex, age, site, path = validation_set.__getitem__(i)
         data_gpu = data_sample.unsqueeze(0).cuda()
         output = model(data_gpu)
-        pred_array.append(output.item())
 
-        result = (output >= 0.5).to(torch.int)
-        result_array.append(result.item())
-        
+        if args.compute_type == 'ap':
+            pred_array.append(output.item())
+            result = (output >= 0.5).to(torch.int)
+            gt_array.append(y.item())
+            result_array.append(result.item())
+        elif args.compute_type == 'acc':
+            gt_array.append(y.item())
+            _, predicted = torch.max(output.data, 1)
+            result_array.append(predicted.item())
+            pred = output[:, 1]
+            pred_array.append(pred.item())
+
         # result = torch.argmax(output)
         # result_array.append(result.item())
-        
-        gt_array.append(y.item())
+
         A_sex_array.append(sex)
         A_age_array.append(age)
         A_site_array.append(site)
@@ -204,7 +211,7 @@ def test(train_loader, validation_set, model, epoch):
 [path_array, pred_array, gt_array, A_sex_array, A_age_array, A_site_array]
 
 
-def test_client(train_loader, validation_set, model, epoch):
+def test_client(args, train_loader, validation_set, model, epoch):
     model.eval()
     result_array = []
     pred_array = []
@@ -222,15 +229,22 @@ def test_client(train_loader, validation_set, model, epoch):
         data_sample, y, sex, age, site, path = validation_set.__getitem__(i)
         data_gpu = data_sample.unsqueeze(0).cuda()
         output = model(data_gpu)
-        pred_array.append(output.item())
 
-        result = (output >= 0.5).to(torch.int)
-        result_array.append(result.item())
+        if args.compute_type == 'ap':
+            pred_array.append(output.item())
+            result = (output >= 0.5).to(torch.int)
+            gt_array.append(y.item())
+            result_array.append(result.item())
+        elif args.compute_type == 'acc':
+            gt_array.append(y.item())
+            _, predicted = torch.max(output.data, 1)
+            result_array.append(predicted.item())
+            pred = output[:, 1]
+            pred_array.append(pred.item())
         
         # result = torch.argmax(output)
         # result_array.append(result.item())
-        
-        gt_array.append(y.item())
+
         A_sex_array.append(sex)
         A_age_array.append(age)
         A_site_array.append(site)
@@ -274,7 +288,7 @@ def test_client(train_loader, validation_set, model, epoch):
 
 
 
-def FairFedTest(train_loader, validation_set, model, epoch, writer, model_type):
+def FairFedTest(args, train_loader, validation_set, model, epoch, writer, model_type):
     dataset_size = []
     dataset_total_size = 0
     for index in range(2):
@@ -283,7 +297,7 @@ def FairFedTest(train_loader, validation_set, model, epoch, writer, model_type):
 
     if model_type == 'global':
         accuracy, ap, Site_dp_results, Site_eo_results, Sex_dp_results, Sex_eo_results, Age_dp_results, Age_eo_results, csv_info = \
-            test(train_loader[0], validation_set[0], model, epoch)
+            test(args, train_loader[0], validation_set[0], model, epoch)
 
         writer.writerow({'epoch': epoch, 'acc':accuracy, 'ap': ap,
                          'Site_DP': Site_dp_results,
@@ -311,7 +325,7 @@ def FairFedTest(train_loader, validation_set, model, epoch, writer, model_type):
         
     elif model_type == 'client':
         site0_age_dp, site1_age_dp, site0_sex_dp, site1_sex_dp, site0_age_eo, site1_age_eo, site0_sex_eo, site1_sex_eo = \
-            test_client(train_loader[0], validation_set[0], model, epoch)
+            test_client(args, train_loader[0], validation_set[0], model, epoch)
         
         Age_dp_results = [site0_age_dp, site1_age_dp]
         Age_eo_results = [site0_age_eo, site1_age_eo]
